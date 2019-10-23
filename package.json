@@ -3,7 +3,7 @@
   "description": "Cloud Functions for Firebase",
   "main": "lib/index.js",
   "scripts": {
-    "lint": "eslint 'src/**/*.{js,ts}' --fix",
+    "lint": "eslint 'src/commands/*.{js,ts}' --fix",
     "build": "npm run lint && tsc",
     "serve": "firebase serve --only functions",
     "shell": "firebase functions:shell",
@@ -13,7 +13,8 @@
     "dbreset": "firebase firestore:delete --all-collections",
     "dbseed:users": "node lib/src/commands/dbseed.js users",
     "dbseed:menus": "node lib/src/commands/dbseed.js menus",
-    "dbseed:shops": "node lib/src/commands/dbseed.js shops"
+    "dbseed:shops": "node lib/src/commands/dbseed.js shops",
+    "dbseed:orders": "node lib/src/commands/dbseed.js orders"
   },
   "engines": {
     "node": "8"
