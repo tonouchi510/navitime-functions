@@ -35,8 +35,8 @@ const uploadSeed = async (collection: string) => {
         });
         const ref2 = db.collection('users');
         const geop = new admin.firestore.GeoPoint(
-          doc.geopoint.latitude,
-          doc.geopoint.longitude,
+          parseFloat(doc.geopoint.latitude),
+          parseFloat(doc.geopoint.longitude),
         );
         const profile = {
           address: doc.address,
@@ -48,7 +48,7 @@ const uploadSeed = async (collection: string) => {
       return;
     }
     case collectionName.menus: {
-      const docs = await csv2json({ nullObject: false })
+      const docs = await csv2json()
         .fromFile('seeds/navitime_dev_menus.csv')
         .then(jsonObj => {
           return jsonObj.map(record => ({
@@ -56,11 +56,11 @@ const uploadSeed = async (collection: string) => {
           }));
         });
       for await (const doc of docs) {
-        const { uid } = doc;
+        const { id } = doc;
         const docWithoutId = { ...doc };
-        delete docWithoutId.uid;
-        if (uid != null) {
-          await ref.doc(uid).set(docWithoutId);
+        delete docWithoutId.id;
+        if (id != null) {
+          await ref.doc(id).set(docWithoutId);
         }
       }
 
@@ -76,8 +76,8 @@ const uploadSeed = async (collection: string) => {
         });
       for await (const doc of docs) {
         doc.geopoint = new admin.firestore.GeoPoint(
-          doc.geopoint.latitude,
-          doc.geopoint.longitude,
+          parseFloat(doc.geopoint.latitude),
+          parseFloat(doc.geopoint.longitude),
         );
 
         const { id } = doc;
@@ -100,12 +100,12 @@ const uploadSeed = async (collection: string) => {
         });
       for await (const doc of docs) {
         doc.shop.geopoint = new admin.firestore.GeoPoint(
-          doc.shop.geopoint.latitude,
-          doc.user_info.geopoint.longitude,
+          parseFloat(doc.shop.geopoint.latitude),
+          parseFloat(doc.shop.geopoint.longitude),
         );
         doc.user_info.geopoint = new admin.firestore.GeoPoint(
-          doc.shop.geopoint.latitude,
-          doc.user_info.geopoint.longitude,
+          parseFloat(doc.user_info.geopoint.latitude),
+          parseFloat(doc.user_info.geopoint.longitude),
         );
         // TODO: created_atの修正も必要
 
