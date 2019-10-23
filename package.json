@@ -3,12 +3,17 @@
   "description": "Cloud Functions for Firebase",
   "main": "lib/index.js",
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint 'src/**/*.{js,ts}' --fix",
+    "build": "npm run lint && tsc",
     "serve": "firebase serve --only functions",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "dbreset": "firebase firestore:delete --all-collections",
+    "dbseed:users": "node lib/src/commands/dbseed.js users",
+    "dbseed:menus": "node lib/src/commands/dbseed.js menus",
+    "dbseed:shops": "node lib/src/commands/dbseed.js shops"
   },
   "engines": {
     "node": "8"
@@ -16,16 +21,31 @@
   "dependencies": {
     "axios": "^0.19.0",
     "commander": "^3.0.2",
-    "csv-parse": "^4.6.5",
     "csvtojson": "^2.0.10",
     "firebase": "^7.2.1",
     "firebase-admin": "^8.0.0",
     "firebase-functions": "^3.1.0"
   },
   "devDependencies": {
-    "eslint": "^5.12.0",
+    "@types/eslint": "^6.1.1",
+    "@types/eslint-plugin-prettier": "^2.2.0",
+    "@types/jest": "^24.0.18",
+    "@types/prettier": "^1.18.2",
+    "@typescript-eslint/eslint-plugin": "^2.3.1",
+    "@typescript-eslint/parser": "^2.3.1",
+    "eslint": "^6.4.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-prettier": "^6.3.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jest": "^22.17.0",
+    "eslint-plugin-prefer-arrow": "^1.1.6",
+    "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-promise": "^4.0.1",
-    "firebase-functions-test": "^0.1.6"
+    "jest": "^24.9.0",
+    "prettier": "^1.18.2",
+    "firebase-functions-test": "^0.1.6",
+    "ts-jest": "^24.0.2",
+    "typescript": "^3.6.4"
   },
   "private": true
 }
