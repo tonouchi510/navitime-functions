@@ -107,7 +107,7 @@ const uploadSeed = async (collection: string) => {
           parseFloat(doc.user_info.geopoint.latitude),
           parseFloat(doc.user_info.geopoint.longitude),
         );
-        // TODO: created_atの修正も必要
+        doc.createdAt = new Date();
 
         const { id } = doc;
         const docWithoutId = { ...doc };
