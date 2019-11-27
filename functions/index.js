@@ -37,7 +37,7 @@ exports.getRoute = functions.region('asia-northeast1').https.onRequest((req, res
             console.log(endTime)
 
             if (timeAtGoal < endTime) {
-                res.status(200).send(js2.items[0].sections)
+                res.status(200).send({routes:js2.items[0].sections})
             } else {
                 res.status(200).send("")
             }
@@ -47,7 +47,6 @@ exports.getRoute = functions.region('asia-northeast1').https.onRequest((req, res
     })()
 });
 
-/*
 exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) => {
     if (req.query.latitude === undefined || req.query.longitude === undefined) {
         res.status(400).send('No parameter defined!');
@@ -996,4 +995,3 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
         }
     })()
 });
-*/
