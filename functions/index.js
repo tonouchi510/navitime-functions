@@ -53,6 +53,7 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
     }
     const lat = req.query.latitude
     const lon = req.query.longitude
+    const shop = ['35.689614', '139.691634']
 
     const url = 'http://api-challenge.navitime.biz/v1s/v9PTKKV38X8b/route/reachable?start='+lat+','+lon+'&move-reachable=bicycle&term=15&partition-count=10&limit=10'
     const list = (async function() {
@@ -980,7 +981,16 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
                 '      function init() {\n' +
                 '        // 緯度・経度にdegree形式を利用する場合は必ず、シングルコーテーションで囲む\n' +
                 '        // 通常はmillisec形式を推奨\n' +
-                '        const map = new navitime.geo.Map(\'map\', new navitime.geo.LatLng(\''+lat+'\', \''+lon+'\'), 15);\n' +
+                //'        var position = new navitime.geo.LatLng(\''+shop[0]+'\',\''+shop[1]+'\');\n' +
+                '        var tocho = new navitime.geo.LatLng(\'35.689634\', \'139.692101\');\n' +
+                '        var shin_okubo = new navitime.geo.LatLng(\'35.701429\', \'139.700003\');\n' +
+                '        var map = new navitime.geo.Map(\'map\', new navitime.geo.LatLng(\''+lat+'\', \''+lon+'\'), 15);\n' +
+                '        var staticPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1WGFz6np73OzBc51VPTaTgmFLRneWYXkm\',position:tocho, draggable:false, map:map, title:\'都庁\'});\n' +
+                //'        var staticPin = new navitime.geo.overlay.Pin({icon:\'https://www.freepnglogos.com/uploads/pin-png/location-pin-connectsafely-37.png\',position:tocho, draggable:false, map:map, title:\'都庁\'});\n' +
+                //吹き出し2（テキストでセット)
+                //'        var infoWindow2 = new navitime.geo.overlay.InfoWindow({map:map, position:tocho, content:\'東京都庁\'});\n'+
+                //'        circle = new navitime.geo.overlay.Circle({center: tocho, fillColor: \'#006400\', fillOpacity: 0.2, radius: 50, strokeColor: \'#006400\', strokeOpacity: 0.8, strokeWeight: 2, map:map});\n' +
+                //'        circle = new navitime.geo.overlay.Circle({center: shin_okubo, fillColor: \'#006400\', fillOpacity: 0.2, radius: 50, strokeColor: \'#006400\', strokeOpacity: 0.8, strokeWeight: 2, map:map});\n' +
                 '      }\n' +
                 '    </script>\n' +
                 '  </head>\n' +
@@ -995,3 +1005,5 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
         }
     })()
 });
+
+
