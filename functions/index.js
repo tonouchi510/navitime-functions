@@ -32,6 +32,7 @@ exports.getRoute = functions.region('asia-northeast1').https.onRequest((req, res
             const response2 = await axios.get(enUrl2)
             const js2 = await response2.data
             const timeAtGoal = new Date(js2.items[0].summary.move.to_time)
+            timeAtGoal.setHours(timeAtGoal.getHours() + 9)
             console.log(timeAtGoal)
             const goalTime = "YYYY-MM-DDThh:mm"
                 .replace("YYYY", timeAtGoal.getFullYear())
@@ -54,17 +55,18 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
     /***
      * latitude: 現在地の latitude
      * longitude: 現在地の longitude
-     * shop: 店 (店の LatLon の配列 (例: shop=[{"lat":'35.689634',"lon":'139.692101'},{"lat":'35.701429', "lon":'139.700003'}]
+     * order: オーダーの配列 (オーダーは，[[{ shop1の LatLon },{ via1の配列 }], [{ shop2のLatLon }, {via2の配列}]] )
      *
      * リクエスト例:
      * https://asia-northeast1-navitime-challenge.cloudfunctions.net/getMap?longitude=139.692101&latitude=35.689634&shop=[{"lat":'35.689634',"lon":'139.692101'},{"lat":'35.701429', "lon":'139.700003'}]
      */
-    if (req.query.latitude === undefined || req.query.longitude === undefined || req.query.shop === undefined) {
+    if (req.query.latitude === undefined || req.query.longitude === undefined) {
         res.status(400).send('No parameter defined!');
     }
     const lat = req.query.latitude
     const lon = req.query.longitude
-    const shop = req.query.shop
+    //const shop = req.query.shop
+    const order = req.query.order
 
     const url = 'http://api-challenge.navitime.biz/v1s/v9PTKKV38X8b/route/reachable?start='+lat+','+lon+'&move-reachable=bicycle&term=15&partition-count=10&limit=10'
     const list = (async function() {
@@ -75,6 +77,7 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
                 let coord = data.items[i].coord
                 console.log(coord)
             }
+
 
             const html = '<!DOCTYPE html>\n' +
                 '<html>\n' +
@@ -992,14 +995,17 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
                 '      function init() {\n' +
                 '        // 緯度・経度にdegree形式を利用する場合は必ず、シングルコーテーションで囲む\n' +
                 '        // 通常はmillisec形式を推奨\n' +
-                '        var map = new navitime.geo.Map(\'map\', new navitime.geo.LatLng(\''+lat+'\', \''+lon+'\'), 14);\n' +
-                '        var shop = ' + shop + '\n' +
-                '        for (i=0; i<shop.length; i++){\n' +
-                '            var lat =  shop[i].lat;\n' +
-                '            var lon = shop[i].lon;\n' +
-                '            var position = new navitime.geo.LatLng(lat,lon);\n' +
-                '            var staticPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1sQ-fTrdiNmV7nO1wXJSHyTYwWUgheUGv\',position:position, draggable:false, map:map, title:\'shop\'+i});\n' +
-                '        }\n' +
+                '        var now = new navitime.geo.LatLng(\''+lat+'\', \''+lon+'\');\n' +
+                '        var map = new navitime.geo.Map(\'map\', now, 14);\n' +
+                '        var NowPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1NvBykveDxWrrEVyezzJDNVxqRqDX4gwF\',position:now, draggable:false, map:map, title:\'shop\'+i});\n' +
+                '        var order = ' + order + ';\n' +
+                //'        var shop = ' + shop + '\n' +
+                //'        for (i=0; i<shop.length; i++){\n' +
+                //'            var lat =  shop[i].lat;\n' +
+                //'            var lon = shop[i].lon;\n' +
+                //'            var position = new navitime.geo.LatLng(lat,lon);\n' +
+                //'            var staticPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1sQ-fTrdiNmV7nO1wXJSHyTYwWUgheUGv\',position:position, draggable:false, map:map, title:\'shop\'+i});\n' +
+                //'        }\n' +
                 '      }\n' +
                 '    </script>\n' +
                 '  </head>\n' +
@@ -1028,7 +1034,7 @@ exports.getRouteMap = functions.region('asia-northeast1').https.onRequest((req, 
      * リクエストの例
      * https://asia-northeast1-navitime-challenge.cloudfunctions.net/getRouteMap?latitude=35.689634&longitude=139.692101&start={"lat":35.689634,"lon":139.692101}&shop={"lat":35.701429,"lon":139.70003}&starttime=2018-05-01T13:00&via=[{"lat":"35.669581", "lon":"139.682198"}, {"lat":"35.683334", "lon":"139.683687"}]
      */
-    if (req.query.latitude === undefined || req.query.longitude === undefined) {
+    if (req.query.latitude === undefined || req.query.longitude === undefined || req.query.shop === undefined) {
         res.status(400).send('No parameter defined!');
     }
     const lat = req.query.latitude
