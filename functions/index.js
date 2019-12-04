@@ -998,7 +998,7 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
                 '            var lat =  shop[i].lat;\n' +
                 '            var lon = shop[i].lon;\n' +
                 '            var position = new navitime.geo.LatLng(lat,lon);\n' +
-                '            var staticPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1gFJ1jqyRd_xNRVyaCSEx1S1dRk7syWpS\',position:position, draggable:false, map:map, title:\'shop\'+i});\n' +
+                '            var staticPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1sQ-fTrdiNmV7nO1wXJSHyTYwWUgheUGv\',position:position, draggable:false, map:map, title:\'shop\'+i});\n' +
                 '        }\n' +
                 '      }\n' +
                 '    </script>\n' +
@@ -1976,15 +1976,17 @@ exports.getRouteMap = functions.region('asia-northeast1').https.onRequest((req, 
                 '        navitime.geo.GeoJSON.draw({map: map, json: route2});\n'+
                 '        var shop = ' + shop + '\n' +
                 '        var via = ' + via + '\n' +
-                '        var lat =  shop.lat;\n' +
-                '        var lon = shop.lon;\n' +
-                '        var position = new navitime.geo.LatLng(lat,lon);\n' +
-                '        var staticPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1gFJ1jqyRd_xNRVyaCSEx1S1dRk7syWpS\',position:position, draggable:false, map:map, title:\'shop\'});\n' +
+                '        var shop_lat =  shop.lat;\n' +
+                '        var shop_lon = shop.lon;\n' +
+                '        var shop_position = new navitime.geo.LatLng(shop_lat,shop_lon);\n' +
+                '        var ShopPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1sQ-fTrdiNmV7nO1wXJSHyTYwWUgheUGv\',position:shop_position, draggable:false, map:map, title:\'shop\'});\n' +
+                '        var now_position = new navitime.geo.LatLng(' + lat + ',' + lon +');\n' +
+                '        var NowPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1gFJ1jqyRd_xNRVyaCSEx1S1dRk7syWpS\',position:now_position, draggable:false, map:map, title:\'now\'});\n' +
                 '        for (i=0; i<via.length; i++){\n' +
                 '            var lat =  via[i].lat;\n' +
                 '            var lon = via[i].lon;\n' +
                 '            var position = new navitime.geo.LatLng(lat,lon);\n' +
-                '            var staticPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1OH058kxsYxMLE9GQyu2Iiqp4aussnvqV\',position:position, draggable:false, map:map, title:\'via\'+i});\n' +
+                '            var ViaPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1OH058kxsYxMLE9GQyu2Iiqp4aussnvqV\',position:position, draggable:false, map:map, title:\'via\'+i, iconPosition:navitime.geo.ControlPosition.BOTTOM_LEFT});\n' +
                 '        }\n' +
                 '      }\n' +
                 '    </script>\n' +
