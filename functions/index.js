@@ -48,6 +48,9 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
      * latitude: 現在地の latitude
      * longitude: 現在地の longitude
      * shop: 店 (店の LatLon の配列 (例: shop=[{"lat":'35.689634',"lon":'139.692101'},{"lat":'35.701429', "lon":'139.700003'}]
+     *
+     * リクエスト例:
+     * https://asia-northeast1-navitime-challenge.cloudfunctions.net/getMap?longitude=139.692101&latitude=35.689634&shop=[{"lat":'35.689634',"lon":'139.692101'},{"lat":'35.701429', "lon":'139.700003'}]
      */
     if (req.query.latitude === undefined || req.query.longitude === undefined || req.query.shop === undefined) {
         res.status(400).send('No parameter defined!');
@@ -988,7 +991,7 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
                 '            var lat =  shop[i].lat;\n' +
                 '            var lon = shop[i].lon;\n' +
                 '            var position = new navitime.geo.LatLng(lat,lon);\n' +
-                '            var staticPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1WGFz6np73OzBc51VPTaTgmFLRneWYXkm\',position:position, draggable:false, map:map, title:\'shop\'+i});\n' +
+                '            var staticPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1gFJ1jqyRd_xNRVyaCSEx1S1dRk7syWpS\',position:position, draggable:false, map:map, title:\'shop\'+i});\n' +
                 '        }\n' +
                 '      }\n' +
                 '    </script>\n' +
@@ -1016,13 +1019,15 @@ exports.getRouteMap = functions.region('asia-northeast1').https.onRequest((req, 
      * via: 経由地（配達先地点の配列）
      *
      * リクエストの例
-     * https://asia-northeast1-navitime-challenge.cloudfunctions.net/getRouteMap?latitude=35.689634&longitude=139.692101&start={"lat":35.689634,"lon":139.692101}&shop={"lat":35.701429,"lon":139.70003}&starttime=2018-05-01T13:00&via=[{"name":"代々木公園","lat":"35.669788","lon":"139.691099","spot":"02301-1300514"}]
+     * https://asia-northeast1-navitime-challenge.cloudfunctions.net/getRouteMap?latitude=35.689634&longitude=139.692101&start={"lat":35.689634,"lon":139.692101}&shop={"lat":35.701429,"lon":139.70003}&starttime=2018-05-01T13:00&via=[{"lat":"35.669581", "lon":"139.682198"}, {"lat":"35.683334", "lon":"139.683687"}]
      */
     if (req.query.latitude === undefined || req.query.longitude === undefined) {
         res.status(400).send('No parameter defined!');
     }
     const lat = req.query.latitude
     const lon = req.query.longitude
+    const shop = req.query.shop
+    const via = req.query.via
 
 
     const url1 = 'https://api-challenge.navitime.biz/v1s/v9PTKKV38X8b/route/shape?bicycle=only&start=' + req.query.start
@@ -1962,6 +1967,18 @@ exports.getRouteMap = functions.region('asia-northeast1').https.onRequest((req, 
                 '        navitime.geo.GeoJSON.draw({map: map, json: route1});\n'+
                 '        var route2 = ' + JSON.stringify(geojson2) + ';\n' +
                 '        navitime.geo.GeoJSON.draw({map: map, json: route2});\n'+
+                '        var shop = ' + shop + '\n' +
+                '        var via = ' + via + '\n' +
+                '        var lat =  shop.lat;\n' +
+                '        var lon = shop.lon;\n' +
+                '        var position = new navitime.geo.LatLng(lat,lon);\n' +
+                '        var staticPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1gFJ1jqyRd_xNRVyaCSEx1S1dRk7syWpS\',position:position, draggable:false, map:map, title:\'shop\'});\n' +
+                '        for (i=0; i<via.length; i++){\n' +
+                '            var lat =  via[i].lat;\n' +
+                '            var lon = via[i].lon;\n' +
+                '            var position = new navitime.geo.LatLng(lat,lon);\n' +
+                '            var staticPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1OH058kxsYxMLE9GQyu2Iiqp4aussnvqV\',position:position, draggable:false, map:map, title:\'via\'+i});\n' +
+                '        }\n' +
                 '      }\n' +
                 '    </script>\n' +
                 '  </head>\n' +
