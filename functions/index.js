@@ -10,7 +10,6 @@ exports.getRoute = functions.region('asia-northeast1').https.onRequest((req, res
      * start: 出発地 and 到着地 (現在地から配達を終えて現在地に戻ってくるという設定)
      * shop: お店の緯度経度
      * starttime: 開始時刻
-     * endtime: 終了時刻
      * via: 経由地（配達先地点の配列）
      */
     console.log(req.query);
@@ -27,24 +26,23 @@ exports.getRoute = functions.region('asia-northeast1').https.onRequest((req, res
             const url2 = 'https://api-challenge.navitime.biz/v1s/v9PTKKV38X8b/route?bicycle=only&start=' + req.query.shop
                 +'&goal=' + req.query.start + '&via=' + req.query.via + '&start-time=' + timeAtShop.slice(0, -6);
             const enUrl2 = encodeURI(url2);
-            console.log(enUrl2)
 
             const response2 = await axios.get(enUrl2)
             const js2 = await response2.data
+            js2.items[0].sections.shift()
+            js2.items[0].sections.forEach(function(v) { // 重複するshopの分を削除して加えている
+                js.items[0].sections.push(v)
+            })
             const timeAtGoal = new Date(js2.items[0].summary.move.to_time)
             timeAtGoal.setHours(timeAtGoal.getHours() + 9)
-            console.log(timeAtGoal)
             const goalTime = "YYYY-MM-DDThh:mm"
                 .replace("YYYY", timeAtGoal.getFullYear())
                 .replace("MM", ('0' + (timeAtGoal.getMonth() + 1)).slice(-2))
                 .replace("DD", ('0' + (timeAtGoal.getDate())).slice(-2))
                 .replace("hh", ('0' + (timeAtGoal.getHours())).slice(-2))
                 .replace("mm", ('0' + (timeAtGoal.getMinutes())).slice(-2))
-            const endTime = new Date(req.query.endtime)
-            console.log(goalTime)
-            console.log(endTime)
 
-            res.status(200).send({routes:js2.items[0].sections,goaltime:goalTime})
+            res.status(200).send({routes:js.items[0].sections,goaltime:goalTime})
         } catch (error) {
             res.status(500).send(error)
         }
