@@ -31,12 +31,19 @@ exports.getRoute = functions.region('asia-northeast1').https.onRequest((req, res
 
             const response2 = await axios.get(enUrl2)
             const js2 = await response2.data
-            const timeAtGoal = new Date(js2.items[0].summary.move.to_time.slice(0, -6))
-            const endTime = new Date(req.query.endtime)
+            const timeAtGoal = new Date(js2.items[0].summary.move.to_time)
             console.log(timeAtGoal)
+            const goalTime = "YYYY-MM-DDThh:mm"
+                .replace("YYYY", timeAtGoal.getFullYear())
+                .replace("MM", ('0' + (timeAtGoal.getMonth() + 1)).slice(-2))
+                .replace("DD", ('0' + (timeAtGoal.getDate())).slice(-2))
+                .replace("hh", ('0' + (timeAtGoal.getHours())).slice(-2))
+                .replace("mm", ('0' + (timeAtGoal.getMinutes())).slice(-2))
+            const endTime = new Date(req.query.endtime)
+            console.log(goalTime)
             console.log(endTime)
 
-            res.status(200).send({routes:js2.items[0].sections})
+            res.status(200).send({routes:js2.items[0].sections,goaltime:goalTime})
         } catch (error) {
             res.status(500).send(error)
         }
