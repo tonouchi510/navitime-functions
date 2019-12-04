@@ -55,10 +55,12 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
     /***
      * latitude: 現在地の latitude
      * longitude: 現在地の longitude
-     * order: オーダーの配列 (オーダーは，[[{ shop1の LatLon },{ via1の配列 }], [{ shop2のLatLon }, {via2の配列}]] )
+     * order: オーダーの配列      例:[{"shop":{"lat":35.701429,"lon":139.70003}, "via":[{"lat":"35.669581", "lon":"139.682198"}, {"lat":"35.683334", "lon":"139.683687"}]}]
+     * start-time: 開始時刻  例:2018-05-01T13:00
      *
      * リクエスト例:
      * https://asia-northeast1-navitime-challenge.cloudfunctions.net/getMap?longitude=139.692101&latitude=35.689634&shop=[{"lat":'35.689634',"lon":'139.692101'},{"lat":'35.701429', "lon":'139.700003'}]
+     * https://asia-northeast1-navitime-challenge.cloudfunctions.net/getMap?longitude=139.692101&latitude=35.689634&order=[{"shop":{"lat":35.701429,"lon":139.70003}, "via":[{"lat":"35.701429", "lon":"139.682198"}]}, {"shop": {"lat":35.684429,"lon":139.70003}, "via":[{"lat":"35.683334", "lon":"139.683687"}]}]&starttime=2018-05-01T13:00
      */
     if (req.query.latitude === undefined || req.query.longitude === undefined) {
         res.status(400).send('No parameter defined!');
@@ -66,7 +68,8 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
     const lat = req.query.latitude
     const lon = req.query.longitude
     //const shop = req.query.shop
-    const order = req.query.order
+    const order = JSON.parse(req.query.order)
+    console.log(order)
 
     const url = 'http://api-challenge.navitime.biz/v1s/v9PTKKV38X8b/route/reachable?start='+lat+','+lon+'&move-reachable=bicycle&term=15&partition-count=10&limit=10'
     const list = (async function() {
@@ -77,6 +80,21 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
                 let coord = data.items[i].coord
                 console.log(coord)
             }
+
+            const url1 = 'https://api-challenge.navitime.biz/v1s/v9PTKKV38X8b/route/shape?bicycle=only&start={"lat":\'' + lat + '\',"lon":\'' + lon + '\'}'
+                +'&goal=' + JSON.stringify(order[0].shop) + '&start-time=' + req.query.starttime;
+            const enUrl1 = encodeURI(url1);
+            console.log(url1)
+
+            const response1 = await axios.get(enUrl1)
+            const geojson1 = await response1.data
+            console.log(JSON.stringify(geojson1))
+
+            /*
+            const url2 = 'https://api-challenge.navitime.biz/v1s/v9PTKKV38X8b/route/shape?bicycle=only&start=' + req.query.shop
+                +'&goal=' + req.query.start + '&via=' + req.query.via + '&start-time=' + req.query.starttime;
+            const enUrl2 = encodeURI(url2);
+             */
 
 
             const html = '<!DOCTYPE html>\n' +
@@ -998,14 +1016,19 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
                 '        var now = new navitime.geo.LatLng(\''+lat+'\', \''+lon+'\');\n' +
                 '        var map = new navitime.geo.Map(\'map\', now, 14);\n' +
                 '        var NowPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1NvBykveDxWrrEVyezzJDNVxqRqDX4gwF\',position:now, draggable:false, map:map, title:\'now\'});\n' +
-                '        var order = ' + order + ';\n' +
-                //'        var shop = ' + shop + '\n' +
-                //'        for (i=0; i<shop.length; i++){\n' +
-                //'            var lat =  shop[i].lat;\n' +
-                //'            var lon = shop[i].lon;\n' +
-                //'            var position = new navitime.geo.LatLng(lat,lon);\n' +
-                //'            var staticPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1sQ-fTrdiNmV7nO1wXJSHyTYwWUgheUGv\',position:position, draggable:false, map:map, title:\'shop\'+i});\n' +
-                //'        }\n' +
+                '        var order = ' + JSON.stringify(order) + ';\n' +
+                '        for (i=0;i<order.length;i++){ \n' +
+                '            var order_shop = order[i].shop; \n' +
+                '            var order_via = order[i].via; \n' +
+                '            console.log(order_shop);\n' +
+                '            var shop_position = new navitime.geo.LatLng(order_shop.lat,order_shop.lon);\n' +
+                '            var shop_Pin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1sQ-fTrdiNmV7nO1wXJSHyTYwWUgheUGv\',position:shop_position, draggable:false, map:map, title:\'shop\'+i});\n' +
+                '            for (j=0; j<order_via.length; j++){\n' +
+                '                var via_position = new navitime.geo.LatLng(order_via[j].lat,order_via[j].lon);\n' +
+                '                var ViaPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1OH058kxsYxMLE9GQyu2Iiqp4aussnvqV\',position:via_position, draggable:false, map:map, title:\'via\'+ i  +\'_\' + j , iconPosition:navitime.geo.ControlPosition.BOTTOM_LEFT});\n' +
+                '            }\n' +
+                '        }\n' +
+                '        navitime.geo.GeoJSON.draw({map: map, json:' + JSON.stringify(geojson1) + '});\n'+
                 '      }\n' +
                 '    </script>\n' +
                 '  </head>\n' +
