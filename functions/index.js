@@ -997,7 +997,7 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
                 '        // 通常はmillisec形式を推奨\n' +
                 '        var now = new navitime.geo.LatLng(\''+lat+'\', \''+lon+'\');\n' +
                 '        var map = new navitime.geo.Map(\'map\', now, 14);\n' +
-                '        var NowPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1NvBykveDxWrrEVyezzJDNVxqRqDX4gwF\',position:now, draggable:false, map:map, title:\'shop\'+i});\n' +
+                '        var NowPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1NvBykveDxWrrEVyezzJDNVxqRqDX4gwF\',position:now, draggable:false, map:map, title:\'now\'});\n' +
                 '        var order = ' + order + ';\n' +
                 //'        var shop = ' + shop + '\n' +
                 //'        for (i=0; i<shop.length; i++){\n' +
