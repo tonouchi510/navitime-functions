@@ -33,6 +33,10 @@ exports.getRoute = functions.region('asia-northeast1').https.onRequest((req, res
             js2.items[0].sections.forEach(function(v) { // 重複するshopの分を削除して加えている
                 js.items[0].sections.push(v)
             })
+            let i = 0
+            js.items[0].sections.map(function (v) {
+                v.id = i++
+            })
             const timeAtGoal = new Date(js2.items[0].summary.move.to_time)
             timeAtGoal.setHours(timeAtGoal.getHours() + 9)
             const goalTime = "YYYY-MM-DDThh:mm"
@@ -42,6 +46,7 @@ exports.getRoute = functions.region('asia-northeast1').https.onRequest((req, res
                 .replace("hh", ('0' + (timeAtGoal.getHours())).slice(-2))
                 .replace("mm", ('0' + (timeAtGoal.getMinutes())).slice(-2))
 
+            console.log(js.items[0].sections)
             res.status(200).send({routes:js.items[0].sections,goaltime:goalTime})
         } catch (error) {
             res.status(500).send(error)
