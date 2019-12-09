@@ -64,7 +64,7 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
      *
      * リクエスト例:
      * https://asia-northeast1-navitime-challenge.cloudfunctions.net/getMap?longitude=139.692101&latitude=35.689634&shop={"lat":"35.701429","lon":"139.70003"}&goals=[{"lat":"35.701429","lon":"139.682198"},{"lat":"35.683334","lon":"139.683687"}]&starttime=2018-05-01T13:00
-     */
+        */
     if (req.query.latitude === undefined || req.query.longitude === undefined) {
         res.status(400).send('No parameter defined!');
     }
@@ -1016,21 +1016,27 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
                 '      function init() {\n' +
                 '        // 緯度・経度にdegree形式を利用する場合は必ず、シングルコーテーションで囲む\n' +
                 '        // 通常はmillisec形式を推奨\n' +
+                '        var latlon_in_map = [];\n' +
                 '        var now = new navitime.geo.LatLng(\'' + lat + '\', \'' + lon + '\');\n' +
+                '        latlon_in_map.push(now);\n' +
                 '        var map = new navitime.geo.Map(\'map\', now, 14);\n' +
                 '        var shop = ' + shop + ';\n' +
                 '        var shop_position = new navitime.geo.LatLng(shop.lat,shop.lon);\n' +
+                '        latlon_in_map.push(shop_position);\n' +
                 '        var shop_Pin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1sQ-fTrdiNmV7nO1wXJSHyTYwWUgheUGv\',position:shop_position, draggable:false, map:map, title:\'shop\'});\n' +
                 '        var goals = ' + JSON.stringify(goals) + ';\n' +
                 '        for (i=0;i<goals.length;i++){ \n' +
                 '            var goal_position = new navitime.geo.LatLng(goals[i].lat,goals[i].lon);\n' +
+                '            latlon_in_map.push(goal_position);\n' +
                 '            var goalPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1OH058kxsYxMLE9GQyu2Iiqp4aussnvqV\',position:goal_position, draggable:false, map:map, title:\'goal\'+ i , iconPosition:navitime.geo.ControlPosition.BOTTOM_LEFT});\n' +
                 '        }\n' +
                 '        json = [' + geojsons1 + '];\n' +
                 '        for (i=0;i<json.length;i++){' +
                 '            navitime.geo.GeoJSON.draw({map: map, json: json[i]});\n' +
                 '        }\n' +
-                '        var NowPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1NvBykveDxWrrEVyezzJDNVxqRqDX4gwF\',position:now, draggable:false, map:map, title:\'now\'});\n' +
+                '        var NowPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1_PRYN2MMb0H1Eim2tzekO_Db8PgK-NEi\',position:now, draggable:false, map:map, title:\'now\'});\n' +
+                '        var reDrawSettings = navitime.geo.Util.calcAutomaticAdjustmentViewPort(map, latlon_in_map);\n' +
+                '        map.moveTo(reDrawSettings.latlng, reDrawSettings.zoom);\n' +
                 '      }\n' +
                 '    </script>\n' +
                 '  </head>\n' +
@@ -2016,7 +2022,7 @@ exports.getRouteMap = functions.region('asia-northeast1').https.onRequest((req, 
                 '        var ShopPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1sQ-fTrdiNmV7nO1wXJSHyTYwWUgheUGv\',position:shop_position, draggable:false, map:map, title:\'shop\'});\n' +
                 '        var now_position = new navitime.geo.LatLng(' + lat + ',' + lon +');\n' +
                 '        latlon_in_map.push(now_position);\n' +
-                '        var NowPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1gFJ1jqyRd_xNRVyaCSEx1S1dRk7syWpS\',position:now_position, draggable:false, map:map, title:\'now\'});\n' +
+                '        var NowPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1_PRYN2MMb0H1Eim2tzekO_Db8PgK-NEi\',position:now_position, draggable:false, map:map, title:\'now\'});\n' +
                 '        for (i=0; i<via.length; i++){\n' +
                 '            var lat =  via[i].lat;\n' +
                 '            var lon = via[i].lon;\n' +
@@ -2031,7 +2037,7 @@ exports.getRouteMap = functions.region('asia-northeast1').https.onRequest((req, 
                 '    </script>\n' +
                 '  </head>\n' +
                 '  <body onload="init()">\n' +
-                '    <div id="map" style="height:630px; width:360px"></div>\n' +
+                '    <div id="map" style="height:600px; width:360px"></div>\n' +
                 '  </body>\n'
             '</html>\n'
 
