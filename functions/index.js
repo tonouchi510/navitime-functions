@@ -53,20 +53,23 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
     /***
      * latitude: 現在地の latitude
      * longitude: 現在地の longitude
-     * order: オーダーの配列      例:rder=[{"shop":{"lat":35.701429,"lon":139.70003}, "goal":{"lat":"35.701429", "lon":"139.682198"}}, {"shop": {"lat":35.684429,"lon":139.70003}, "goal":{"lat":"35.683334", "lon":"139.683687"}}]
+     * goals: ゴールの配列        例:goals=[{"lat":"35.701429","lon":"139.682198"},{"lat":"35.683334","lon":"139.683687"}]
+     * shop: 店の位置情報      例:shop={"lat":35.701429,"lon":139.70003}
      * start-time: 開始時刻  例:2018-05-01T13:00
      *
      * リクエスト例:
-     * https://asia-northeast1-navitime-challenge.cloudfunctions.net/getMap?longitude=139.692101&latitude=35.689634&order=[{"shop":{"lat":35.701429,"lon":139.70003}, "goal":{"lat":"35.701429", "lon":"139.682198"}}, {"shop": {"lat":35.684429,"lon":139.70003}, "goal":{"lat":"35.683334", "lon":"139.683687"}}]&starttime=2018-05-01T13:00
+     * https://asia-northeast1-navitime-challenge.cloudfunctions.net/getMap?longitude=139.692101&latitude=35.689634&shop={"lat":"35.701429","lon":"139.70003"}&goals=[{"lat":"35.701429","lon":"139.682198"},{"lat":"35.683334","lon":"139.683687"}]&starttime=2018-05-01T13:00
      */
     if (req.query.latitude === undefined || req.query.longitude === undefined) {
         res.status(400).send('No parameter defined!');
     }
     const lat = req.query.latitude
     const lon = req.query.longitude
-    //const shop = req.query.shop
-    const order = JSON.parse(req.query.order)
-    console.log(order)
+    const goals = JSON.parse(req.query.goals)
+    //const shop = JSON.parse(req.query.shop)
+    const shop = req.query.shop
+    console.log(shop)
+    console.log(goals)
 
     const url = 'http://api-challenge.navitime.biz/v1s/v9PTKKV38X8b/route/reachable?start='+lat+','+lon+'&move-reachable=bicycle&term=15&partition-count=10&limit=10'
     const list = (async function() {
@@ -80,14 +83,11 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
 
             geojsons1 = [];
 
-            await Promise.all(order.map(async (o) => {
-                shop = JSON.stringify(o.shop)
-                goal = JSON.stringify(o.goal)
+            await Promise.all(goals.map(async (g) => {
                 const url1 = 'https://api-challenge.navitime.biz/v1s/v9PTKKV38X8b/route/shape?bicycle=only&start={"lat":\'' + lat + '\',"lon":\'' + lon + '\'}'
-                    + '&goal=' + goal + '&start-time=' + req.query.starttime + '&via=' + shop;
+                    + '&goal=' + JSON.stringify(g) + '&start-time=' + req.query.starttime + '&via=' + shop;
                 console.log(url1)
                 const enUrl1 = encodeURI(url1);
-
                 const response1 = await axios.get(enUrl1)
                 const geojson1 = await response1.data
                 geojsons1.push(JSON.stringify(geojson1))
@@ -1013,13 +1013,12 @@ exports.getMap = functions.region('asia-northeast1').https.onRequest((req, res) 
                 '        // 通常はmillisec形式を推奨\n' +
                 '        var now = new navitime.geo.LatLng(\'' + lat + '\', \'' + lon + '\');\n' +
                 '        var map = new navitime.geo.Map(\'map\', now, 14);\n' +
-                '        var order = ' + JSON.stringify(order) + ';\n' +
-                '        for (i=0;i<order.length;i++){ \n' +
-                '            var order_shop = order[i].shop; \n' +
-                '            var order_goal = order[i].goal; \n' +
-                '            var shop_position = new navitime.geo.LatLng(order_shop.lat,order_shop.lon);\n' +
-                '            var shop_Pin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1sQ-fTrdiNmV7nO1wXJSHyTYwWUgheUGv\',position:shop_position, draggable:false, map:map, title:\'shop\'+i});\n' +
-                '            var goal_position = new navitime.geo.LatLng(order_goal.lat,order_goal.lon);\n' +
+                '        var shop = ' + shop + ';\n' +
+                '        var shop_position = new navitime.geo.LatLng(shop.lat,shop.lon);\n' +
+                '        var shop_Pin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1sQ-fTrdiNmV7nO1wXJSHyTYwWUgheUGv\',position:shop_position, draggable:false, map:map, title:\'shop\'});\n' +
+                '        var goals = ' + JSON.stringify(goals) + ';\n' +
+                '        for (i=0;i<goals.length;i++){ \n' +
+                '            var goal_position = new navitime.geo.LatLng(goals[i].lat,goals[i].lon);\n' +
                 '            var goalPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1OH058kxsYxMLE9GQyu2Iiqp4aussnvqV\',position:goal_position, draggable:false, map:map, title:\'goal\'+ i , iconPosition:navitime.geo.ControlPosition.BOTTOM_LEFT});\n' +
                 '        }\n' +
                 '        json = [' + geojsons1 + '];\n' +
@@ -1054,6 +1053,7 @@ exports.getRouteMap = functions.region('asia-northeast1').https.onRequest((req, 
      *
      * リクエストの例
      * https://asia-northeast1-navitime-challenge.cloudfunctions.net/getRouteMap?latitude=35.689634&longitude=139.692101&start={"lat":35.689634,"lon":139.692101}&shop={"lat":35.701429,"lon":139.70003}&starttime=2018-05-01T13:00&via=[{"lat":"35.669581", "lon":"139.682198"}, {"lat":"35.683334", "lon":"139.683687"}]
+     * https://asia-northeast1-navitime-challenge.cloudfunctions.net/getRouteMap?latitude=35.689634&longitude=139.692101&start={"lat":35.689634,"lon":139.692101}&shop={"lat":35.701429,"lon":139.70003}&starttime=2018-05-01T13:00&via=[{"lat":"35.669581", "lon":"139.682198"}, {"lat":"35.683334", "lon":"139.683687"}, {"lat":"35.713373", "lon":"139.703526"}]
      */
     if (req.query.latitude === undefined || req.query.longitude === undefined || req.query.shop === undefined) {
         res.status(400).send('No parameter defined!');
@@ -1996,6 +1996,7 @@ exports.getRouteMap = functions.region('asia-northeast1').https.onRequest((req, 
                 '      function init() {\n' +
                 '        // 緯度・経度にdegree形式を利用する場合は必ず、シングルコーテーションで囲む\n' +
                 '        // 通常はmillisec形式を推奨\n' +
+                '        var latlon_in_map = [];\n' +
                 '        var map = new navitime.geo.Map(\'map\', new navitime.geo.LatLng(\''+lat+'\', \''+lon+'\'), 14);\n' +
                 '        var route1 = ' + JSON.stringify(geojson1) + ';\n' +
                 '        navitime.geo.GeoJSON.draw({map: map, json: route1});\n'+
@@ -2006,15 +2007,21 @@ exports.getRouteMap = functions.region('asia-northeast1').https.onRequest((req, 
                 '        var shop_lat =  shop.lat;\n' +
                 '        var shop_lon = shop.lon;\n' +
                 '        var shop_position = new navitime.geo.LatLng(shop_lat,shop_lon);\n' +
+                '        latlon_in_map.push(shop_position);\n' +
                 '        var ShopPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1sQ-fTrdiNmV7nO1wXJSHyTYwWUgheUGv\',position:shop_position, draggable:false, map:map, title:\'shop\'});\n' +
                 '        var now_position = new navitime.geo.LatLng(' + lat + ',' + lon +');\n' +
+                '        latlon_in_map.push(now_position);\n' +
                 '        var NowPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1gFJ1jqyRd_xNRVyaCSEx1S1dRk7syWpS\',position:now_position, draggable:false, map:map, title:\'now\'});\n' +
                 '        for (i=0; i<via.length; i++){\n' +
                 '            var lat =  via[i].lat;\n' +
                 '            var lon = via[i].lon;\n' +
                 '            var position = new navitime.geo.LatLng(lat,lon);\n' +
+                '            latlon_in_map.push(position);\n' +
                 '            var ViaPin = new navitime.geo.overlay.Pin({icon:\'https://drive.google.com/uc?id=1OH058kxsYxMLE9GQyu2Iiqp4aussnvqV\',position:position, draggable:false, map:map, title:\'via\'+i, iconPosition:navitime.geo.ControlPosition.BOTTOM_LEFT});\n' +
                 '        }\n' +
+                '      // Mapの調整　\n' +
+                '      var reDrawSettings = navitime.geo.Util.calcAutomaticAdjustmentViewPort(map, latlon_in_map);\n' +
+                '      map.moveTo(reDrawSettings.latlng, reDrawSettings.zoom);\n' +
                 '      }\n' +
                 '    </script>\n' +
                 '  </head>\n' +
